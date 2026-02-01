@@ -1,3 +1,20 @@
+import refrigeratorImg from '@/assets/products/refrigerator.jpg';
+import washingMachineImg from '@/assets/products/washing-machine.jpg';
+import airConditionerImg from '@/assets/products/air-conditioner.jpg';
+import blenderImg from '@/assets/products/blender.jpg';
+import toiletPaperImg from '@/assets/products/toilet-paper.jpg';
+import babyDiapersImg from '@/assets/products/baby-diapers.jpg';
+import tissueBoxImg from '@/assets/products/tissue-box.jpg';
+import pvcPipeImg from '@/assets/products/pvc-pipe.jpg';
+import rainGutterImg from '@/assets/products/rain-gutter.jpg';
+import electricalConduitImg from '@/assets/products/electrical-conduit.jpg';
+import motorbikeBoxerImg from '@/assets/products/motorbike-boxer.jpg';
+import motorbikeTvsImg from '@/assets/products/motorbike-tvs.jpg';
+import helmetImg from '@/assets/products/helmet.jpg';
+import smartphoneZteImg from '@/assets/products/smartphone-zte.jpg';
+import smartphoneNubiaImg from '@/assets/products/smartphone-nubia.jpg';
+import powerBankImg from '@/assets/products/power-bank.jpg';
+
 export interface Product {
   id: string;
   name: string;
@@ -27,35 +44,35 @@ export const categories: Category[] = [
     id: '1',
     name: 'Home Appliances',
     slug: 'home-appliances',
-    image: '/placeholder.svg',
+    image: refrigeratorImg,
     subcategories: ['Refrigerators', 'Washing Machines', 'Air Conditioners', 'Microwaves', 'Blenders', 'Electric Kettles']
   },
   {
     id: '2',
     name: 'Piao Piao',
     slug: 'piao-piao',
-    image: '/placeholder.svg',
+    image: toiletPaperImg,
     subcategories: ['Toilet Paper', 'Baby Diapers', 'Adult Diapers', 'Tissue Boxes', 'Wet Wipes']
   },
   {
     id: '3',
     name: 'PVC Products',
     slug: 'pvc',
-    image: '/placeholder.svg',
+    image: pvcPipeImg,
     subcategories: ['PVC Pipes', 'PVC Fittings', 'PVC Sheets', 'Rain Gutters', 'Electrical Conduits']
   },
   {
     id: '4',
     name: 'Automotive',
     slug: 'automotive',
-    image: '/placeholder.svg',
+    image: motorbikeBoxerImg,
     subcategories: ['Motorbikes', 'Spare Parts', 'Accessories', 'Helmets', 'Lubricants']
   },
   {
     id: '5',
     name: 'ZTE | nubia',
     slug: 'zte-nubia',
-    image: '/placeholder.svg',
+    image: smartphoneZteImg,
     subcategories: ['Smartphones', 'Tablets', 'Accessories', 'Power Banks', 'Earphones']
   }
 ];
@@ -69,7 +86,7 @@ export const products: Product[] = [
     subcategory: 'Refrigerators',
     price: 1850000,
     originalPrice: 2100000,
-    image: '/placeholder.svg',
+    image: refrigeratorImg,
     rating: 4.5,
     reviews: 128,
     sku: 'HA-REF-001',
@@ -82,7 +99,7 @@ export const products: Product[] = [
     category: 'Home Appliances',
     subcategory: 'Washing Machines',
     price: 2450000,
-    image: '/placeholder.svg',
+    image: washingMachineImg,
     rating: 4.8,
     reviews: 89,
     sku: 'HA-WM-002',
@@ -95,7 +112,7 @@ export const products: Product[] = [
     subcategory: 'Air Conditioners',
     price: 1650000,
     originalPrice: 1800000,
-    image: '/placeholder.svg',
+    image: airConditionerImg,
     rating: 4.3,
     reviews: 67,
     sku: 'HA-AC-003',
@@ -107,7 +124,7 @@ export const products: Product[] = [
     category: 'Home Appliances',
     subcategory: 'Blenders',
     price: 185000,
-    image: '/placeholder.svg',
+    image: blenderImg,
     rating: 4.2,
     reviews: 45,
     sku: 'HA-BL-004',
@@ -121,7 +138,7 @@ export const products: Product[] = [
     subcategory: 'Toilet Paper',
     price: 28000,
     originalPrice: 32000,
-    image: '/placeholder.svg',
+    image: toiletPaperImg,
     rating: 4.6,
     reviews: 234,
     sku: 'PP-TP-001',
@@ -134,7 +151,7 @@ export const products: Product[] = [
     category: 'Piao Piao',
     subcategory: 'Baby Diapers',
     price: 65000,
-    image: '/placeholder.svg',
+    image: babyDiapersImg,
     rating: 4.7,
     reviews: 189,
     sku: 'PP-BD-002',
@@ -146,7 +163,7 @@ export const products: Product[] = [
     category: 'Piao Piao',
     subcategory: 'Tissue Boxes',
     price: 18000,
-    image: '/placeholder.svg',
+    image: tissueBoxImg,
     rating: 4.4,
     reviews: 98,
     sku: 'PP-TB-003',
@@ -159,7 +176,7 @@ export const products: Product[] = [
     category: 'PVC Products',
     subcategory: 'PVC Pipes',
     price: 45000,
-    image: '/placeholder.svg',
+    image: pvcPipeImg,
     rating: 4.5,
     reviews: 56,
     sku: 'PVC-PP-001',
@@ -172,7 +189,7 @@ export const products: Product[] = [
     subcategory: 'Rain Gutters',
     price: 180000,
     originalPrice: 210000,
-    image: '/placeholder.svg',
+    image: rainGutterImg,
     rating: 4.3,
     reviews: 34,
     sku: 'PVC-RG-002',
@@ -184,7 +201,7 @@ export const products: Product[] = [
     category: 'PVC Products',
     subcategory: 'Electrical Conduits',
     price: 8500,
-    image: '/placeholder.svg',
+    image: electricalConduitImg,
     rating: 4.6,
     reviews: 78,
     sku: 'PVC-EC-003',
@@ -198,7 +215,7 @@ export const products: Product[] = [
     subcategory: 'Motorbikes',
     price: 4500000,
     originalPrice: 4800000,
-    image: '/placeholder.svg',
+    image: motorbikeBoxerImg,
     rating: 4.7,
     reviews: 156,
     sku: 'AUTO-MB-001',
@@ -211,7 +228,7 @@ export const products: Product[] = [
     category: 'Automotive',
     subcategory: 'Motorbikes',
     price: 5200000,
-    image: '/placeholder.svg',
+    image: motorbikeTvsImg,
     rating: 4.8,
     reviews: 203,
     sku: 'AUTO-MB-002',
@@ -223,7 +240,7 @@ export const products: Product[] = [
     category: 'Automotive',
     subcategory: 'Helmets',
     price: 85000,
-    image: '/placeholder.svg',
+    image: helmetImg,
     rating: 4.4,
     reviews: 112,
     sku: 'AUTO-HM-003',
@@ -237,7 +254,7 @@ export const products: Product[] = [
     subcategory: 'Smartphones',
     price: 850000,
     originalPrice: 950000,
-    image: '/placeholder.svg',
+    image: smartphoneZteImg,
     rating: 4.5,
     reviews: 167,
     sku: 'ZTE-SP-001',
@@ -250,7 +267,7 @@ export const products: Product[] = [
     category: 'ZTE | nubia',
     subcategory: 'Smartphones',
     price: 2800000,
-    image: '/placeholder.svg',
+    image: smartphoneNubiaImg,
     rating: 4.9,
     reviews: 89,
     sku: 'NUB-SP-002',
@@ -263,7 +280,7 @@ export const products: Product[] = [
     category: 'ZTE | nubia',
     subcategory: 'Power Banks',
     price: 95000,
-    image: '/placeholder.svg',
+    image: powerBankImg,
     rating: 4.3,
     reviews: 78,
     sku: 'ZTE-PB-003',

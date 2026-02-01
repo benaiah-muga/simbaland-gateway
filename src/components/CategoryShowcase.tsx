@@ -1,14 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { categories } from '@/data/products';
 
-const categoryImages: Record<string, string> = {
-  'home-appliances': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80',
-  'piao-piao': 'https://images.unsplash.com/photo-1584556812952-905ffd0c611a?w=600&q=80',
-  'pvc': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&q=80',
-  'automotive': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-  'zte-nubia': 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80'
-};
-
 const CategoryShowcase = () => {
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-background">
@@ -34,7 +26,7 @@ const CategoryShowcase = () => {
             >
               {/* Image */}
               <img
-                src={categoryImages[category.slug] || '/placeholder.svg'}
+                src={category.image}
                 alt={category.name}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
