@@ -199,7 +199,9 @@
 
   /* Mega Menu Styles */
   .mega-menu {
-    @apply absolute top-full left-0 w-full bg-card shadow-xl opacity-0 invisible transition-all duration-300 z-50;
+    @apply fixed top-auto bg-card border-t border-border shadow-xl opacity-0 invisible transition-all duration-300 z-50;
+    left: 0;
+    right: 0;
     transform: translateY(10px);
   }
 
