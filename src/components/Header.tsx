@@ -124,7 +124,7 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                   onMouseLeave={() => setActiveCategory(null)}
                 >
                   <a
-                    href={`/category/${category.slug}`}
+                    href={`/shop?category=${encodeURIComponent(category.name)}`}
                     className={cn(
                       "flex items-center gap-1 px-4 py-3 font-medium transition-colors",
                       activeCategory === category.id ? "text-accent" : "text-foreground hover:text-accent"
@@ -149,7 +149,7 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                             {category.subcategories.map((sub, idx) => (
                               <a
                                 key={idx}
-                                href={`/category/${category.slug}/${sub.toLowerCase().replace(/\s+/g, '-')}`}
+                                href={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
                                 className="block p-3 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                               >
                                 {sub}
@@ -157,11 +157,14 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                             ))}
                           </div>
                         </div>
-                        <div className="bg-secondary rounded-xl p-4">
+                        <a 
+                          href={`/shop?category=${encodeURIComponent(category.name)}`}
+                          className="bg-secondary rounded-xl p-4 hover:bg-secondary/80 transition-colors"
+                        >
                           <p className="text-sm text-muted-foreground mb-2">Featured</p>
                           <p className="font-semibold text-foreground">Shop {category.name}</p>
                           <p className="text-sm text-accent mt-2">View all products →</p>
-                        </div>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -209,7 +212,7 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                     {category.subcategories.map((sub, idx) => (
                       <li key={idx}>
                         <a
-                          href={`/category/${category.slug}/${sub.toLowerCase().replace(/\s+/g, '-')}`}
+                          href={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
                           className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >

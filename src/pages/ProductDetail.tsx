@@ -69,7 +69,7 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background overflow-x-hidden">
         <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
         <div className="container mx-auto container-padding py-20 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Product Not Found</h1>
@@ -90,7 +90,7 @@ const ProductDetail = () => {
   const specifications = getProductSpecifications(product);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
 
       {/* Breadcrumb */}
