@@ -47,6 +47,9 @@ const Shop = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     searchParams.get('category') ? [searchParams.get('category')!] : []
   );
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
+    searchParams.get('subcategory') ? [searchParams.get('subcategory')!] : []
+  );
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [showOnSale, setShowOnSale] = useState(searchParams.get('filter') === 'sale');
   const [showNew, setShowNew] = useState(searchParams.get('filter') === 'new');
@@ -61,6 +64,11 @@ const Shop = () => {
     // Category filter
     if (selectedCategories.length > 0) {
       result = result.filter((p) => selectedCategories.includes(p.category));
+    }
+
+    // Subcategory filter
+    if (selectedSubcategories.length > 0) {
+      result = result.filter((p) => selectedSubcategories.includes(p.subcategory));
     }
 
     // Price filter
@@ -101,7 +109,7 @@ const Shop = () => {
     }
 
     return result;
-  }, [selectedCategories, priceRange, selectedRatings, showOnSale, showNew, showBestSeller, sortBy]);
+  }, [selectedCategories, selectedSubcategories, priceRange, selectedRatings, showOnSale, showNew, showBestSeller, sortBy]);
 
   const handleAddToCart = (product: Product) => {
     setCartItems((prev) => {
@@ -132,12 +140,19 @@ const Shop = () => {
 
   const clearFilters = () => {
     setSelectedCategories([]);
+    setSelectedSubcategories([]);
     setPriceRange([0, maxPrice]);
     setSelectedRatings([]);
     setShowOnSale(false);
     setShowNew(false);
     setShowBestSeller(false);
     setSearchParams({});
+  };
+
+  const toggleSubcategory = (subcategory: string) => {
+    setSelectedSubcategories((prev) =>
+      prev.includes(subcategory) ? prev.filter((s) => s !== subcategory) : [...prev, subcategory]
+    );
   };
 
   const toggleCategory = (category: string) => {
@@ -154,11 +169,22 @@ const Shop = () => {
 
   const activeFiltersCount =
     selectedCategories.length +
+    selectedSubcategories.length +
     selectedRatings.length +
     (showOnSale ? 1 : 0) +
     (showNew ? 1 : 0) +
     (showBestSeller ? 1 : 0) +
     (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0);
+
+  // Get available subcategories based on selected categories
+  const availableSubcategories = useMemo(() => {
+    if (selectedCategories.length === 0) {
+      return categories.flatMap((c) => c.subcategories);
+    }
+    return categories
+      .filter((c) => selectedCategories.includes(c.name))
+      .flatMap((c) => c.subcategories);
+  }, [selectedCategories]);
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -194,6 +220,38 @@ const Shop = () => {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      {/* Subcategories */}
+      {availableSubcategories.length > 0 && (
+        <Accordion type="single" collapsible defaultValue="subcategories">
+          <AccordionItem value="subcategories" className="border-none">
+            <AccordionTrigger className="text-base font-semibold py-2 hover:no-underline">
+              Subcategories
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-3 pt-2 max-h-48 overflow-y-auto">
+                {availableSubcategories.map((sub) => (
+                  <label
+                    key={sub}
+                    className="flex items-center gap-3 cursor-pointer group"
+                  >
+                    <Checkbox
+                      checked={selectedSubcategories.includes(sub)}
+                      onCheckedChange={() => toggleSubcategory(sub)}
+                    />
+                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                      {sub}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      ({products.filter((p) => p.subcategory === sub).length})
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       {/* Price Range */}
       <Accordion type="single" collapsible defaultValue="price">
@@ -298,7 +356,7 @@ const Shop = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
 
       {/* Page Header */}
@@ -405,6 +463,17 @@ const Shop = () => {
                     onClick={() => toggleCategory(cat)}
                   >
                     {cat}
+                    <X className="h-3 w-3" />
+                  </Badge>
+                ))}
+                {selectedSubcategories.map((sub) => (
+                  <Badge
+                    key={sub}
+                    variant="secondary"
+                    className="gap-1 pr-1 cursor-pointer hover:bg-secondary"
+                    onClick={() => toggleSubcategory(sub)}
+                  >
+                    {sub}
                     <X className="h-3 w-3" />
                   </Badge>
                 ))}
