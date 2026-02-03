@@ -20,7 +20,7 @@ const CategoryShowcase = () => {
           {categories.map((category, index) => (
             <a
               key={category.id}
-              href={`/category/${category.slug}`}
+              href={`/shop?category=${encodeURIComponent(category.name)}`}
               className="category-card group aspect-[4/5] sm:aspect-[3/4]"
               style={{ animationDelay: `${index * 100}ms` }}
             >
