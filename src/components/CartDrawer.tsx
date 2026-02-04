@@ -1,20 +1,15 @@
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
-import { Product, formatPrice } from '@/data/products';
-
-interface CartItem extends Product {
-  quantity: number;
-}
+import { Link } from 'react-router-dom';
+import { formatPrice } from '@/data/products';
+import { useCart } from '@/contexts/CartContext';
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-  onRemoveItem: (productId: string) => void;
 }
 
-const CartDrawer = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem }: CartDrawerProps) => {
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
+  const { items, totalPrice, updateQuantity, removeFromCart } = useCart();
 
   return (
     <>
@@ -65,37 +60,37 @@ const CartDrawer = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem }: 
             </div>
           ) : (
             <ul className="space-y-4">
-              {items.map((item) => (
-                <li key={item.id} className="flex gap-4 p-4 bg-secondary/50 rounded-xl">
+              {items.map(({ product, quantity }) => (
+                <li key={product.id} className="flex gap-4 p-4 bg-secondary/50 rounded-xl">
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={product.image}
+                    alt={product.name}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-foreground line-clamp-2 text-sm mb-1">
-                      {item.name}
+                      {product.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-2">SKU: {item.sku}</p>
-                    <p className="font-semibold text-primary">{formatPrice(item.price)}</p>
+                    <p className="text-sm text-muted-foreground mb-2">SKU: {product.sku}</p>
+                    <p className="font-semibold text-primary">{formatPrice(product.price)}</p>
                     
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-3 mt-2">
                       <button
-                        onClick={() => onUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                        onClick={() => updateQuantity(product.id, Math.max(0, quantity - 1))}
                         className="p-1 rounded-md border border-border hover:bg-secondary transition-colors"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
-                      <span className="font-medium w-8 text-center">{item.quantity}</span>
+                      <span className="font-medium w-8 text-center">{quantity}</span>
                       <button
-                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(product.id, quantity + 1)}
                         className="p-1 rounded-md border border-border hover:bg-secondary transition-colors"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => removeFromCart(product.id)}
                         className="ml-auto text-sm text-destructive hover:underline"
                       >
                         Remove
@@ -113,11 +108,15 @@ const CartDrawer = ({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem }: 
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 border-t border-border bg-card">
             <div className="flex items-center justify-between mb-4">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-bold text-xl text-foreground">{formatPrice(subtotal)}</span>
+              <span className="font-bold text-xl text-foreground">{formatPrice(totalPrice)}</span>
             </div>
-            <button className="w-full btn-accent py-4">
+            <Link 
+              to="/checkout" 
+              onClick={onClose}
+              className="block w-full btn-accent py-4 text-center"
+            >
               Proceed to Checkout
-            </button>
+            </Link>
             <p className="text-center text-xs text-muted-foreground mt-3">
               Shipping & taxes calculated at checkout
             </p>

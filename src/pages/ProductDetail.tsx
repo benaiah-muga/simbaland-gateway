@@ -1,25 +1,22 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Minus, Plus, ShoppingCart, Heart, Share2, Truck, Shield, RefreshCcw, ChevronRight } from 'lucide-react';
+import { Star, Minus, Plus, ShoppingCart, Heart, Share2, Truck, Shield, RefreshCcw, ChevronRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import CartDrawer from '@/components/CartDrawer';
 import { products, Product, formatPrice } from '@/data/products';
+import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-
-interface CartItem extends Product {
-  quantity: number;
-}
+import { useToast } from '@/hooks/use-toast';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   const product = products.find((p) => p.id === id);
 
@@ -34,43 +31,18 @@ const ProductDetail = () => {
       .slice(0, 4);
   }, [product]);
 
-  const handleAddToCart = (productToAdd: Product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === productToAdd.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === productToAdd.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      return [...prev, { ...productToAdd, quantity }];
+  const handleAddToCart = (productToAdd: Product, qty: number = 1) => {
+    addToCart(productToAdd, qty);
+    toast({
+      title: "Added to cart",
+      description: `${productToAdd.name} has been added to your cart.`
     });
-    setIsCartOpen(true);
   };
-
-  const handleUpdateQuantity = (productId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      setCartItems((prev) => prev.filter((item) => item.id !== productId));
-    } else {
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    }
-  };
-
-  const handleRemoveItem = (productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== productId));
-  };
-
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   if (!product) {
     return (
       <div className="min-h-screen bg-background overflow-x-hidden">
-        <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
+        <Header />
         <div className="container mx-auto container-padding py-20 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Product Not Found</h1>
           <Link to="/shop" className="text-primary hover:underline">
@@ -91,7 +63,7 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
+      <Header />
 
       {/* Breadcrumb */}
       <div className="bg-secondary/30 py-3">
@@ -129,7 +101,7 @@ const ProductDetail = () => {
                   </Badge>
                 )}
                 {product.isNew && (
-                  <Badge className="absolute top-4 right-4 bg-green-500 text-white">
+                  <Badge className="absolute top-4 right-4 bg-success text-success-foreground">
                     NEW
                   </Badge>
                 )}
@@ -223,7 +195,7 @@ const ProductDetail = () => {
                 </div>
 
                 <Button
-                  onClick={() => handleAddToCart(product)}
+                  onClick={() => handleAddToCart(product, quantity)}
                   className="flex-1 btn-primary gap-2"
                   size="lg"
                 >
@@ -425,14 +397,6 @@ const ProductDetail = () => {
       )}
 
       <Footer />
-
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-      />
     </div>
   );
 };
