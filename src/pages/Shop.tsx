@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, Grid3X3, LayoutList, ChevronDown, X, SlidersHorizontal } from 'lucide-react';
+import { Filter, Grid3X3, LayoutList, X, SlidersHorizontal, Star } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import CartDrawer from '@/components/CartDrawer';
 import { products, categories, Product, formatPrice } from '@/data/products';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
@@ -31,16 +32,10 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-interface CartItem extends Product {
-  quantity: number;
-}
-
 type SortOption = 'featured' | 'price-low' | 'price-high' | 'rating' | 'newest';
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 6000000]);
@@ -55,6 +50,8 @@ const Shop = () => {
   const [showNew, setShowNew] = useState(searchParams.get('filter') === 'new');
   const [showBestSeller, setShowBestSeller] = useState(searchParams.get('filter') === 'bestseller');
 
+  const { addToCart } = useCart();
+  const { toast } = useToast();
   const maxPrice = Math.max(...products.map((p) => p.price));
 
   // Filter and sort products
@@ -112,30 +109,11 @@ const Shop = () => {
   }, [selectedCategories, selectedSubcategories, priceRange, selectedRatings, showOnSale, showNew, showBestSeller, sortBy]);
 
   const handleAddToCart = (product: Product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
+    addToCart(product);
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`
     });
-    setIsCartOpen(true);
-  };
-
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setCartItems((prev) => prev.filter((item) => item.id !== productId));
-    } else {
-      setCartItems((prev) =>
-        prev.map((item) => (item.id === productId ? { ...item, quantity } : item))
-      );
-    }
-  };
-
-  const handleRemoveItem = (productId: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== productId));
   };
 
   const clearFilters = () => {
@@ -186,8 +164,6 @@ const Shop = () => {
       .flatMap((c) => c.subcategories);
   }, [selectedCategories]);
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
   // Filter sidebar content (reused in both desktop and mobile)
   const FilterContent = () => (
     <div className="space-y-6">
@@ -211,9 +187,6 @@ const Shop = () => {
                   <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                     {category.name}
                   </span>
-                  <span className="text-xs text-muted-foreground ml-auto">
-                    ({products.filter((p) => p.category === category.name).length})
-                  </span>
                 </label>
               ))}
             </div>
@@ -229,21 +202,15 @@ const Shop = () => {
               Subcategories
             </AccordionTrigger>
             <AccordionContent>
-              <div className="space-y-3 pt-2 max-h-48 overflow-y-auto">
-                {availableSubcategories.map((sub) => (
-                  <label
-                    key={sub}
-                    className="flex items-center gap-3 cursor-pointer group"
-                  >
+              <div className="space-y-3 pt-2 max-h-60 overflow-y-auto">
+                {availableSubcategories.map((sub, idx) => (
+                  <label key={idx} className="flex items-center gap-3 cursor-pointer group">
                     <Checkbox
                       checked={selectedSubcategories.includes(sub)}
                       onCheckedChange={() => toggleSubcategory(sub)}
                     />
                     <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                       {sub}
-                    </span>
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      ({products.filter((p) => p.subcategory === sub).length})
                     </span>
                   </label>
                 ))}
@@ -265,7 +232,8 @@ const Shop = () => {
                 value={priceRange}
                 onValueChange={(value) => setPriceRange(value as [number, number])}
                 max={maxPrice}
-                step={50000}
+                min={0}
+                step={10000}
                 className="mb-4"
               />
               <div className="flex justify-between text-sm text-muted-foreground">
@@ -278,7 +246,7 @@ const Shop = () => {
       </Accordion>
 
       {/* Rating */}
-      <Accordion type="single" collapsible defaultValue="rating">
+      <Accordion type="single" collapsible>
         <AccordionItem value="rating" className="border-none">
           <AccordionTrigger className="text-base font-semibold py-2 hover:no-underline">
             Rating
@@ -293,15 +261,12 @@ const Shop = () => {
                   />
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <svg
+                      <Star
                         key={i}
-                        className={`w-4 h-4 ${
+                        className={`h-4 w-4 ${
                           i < rating ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted'
                         }`}
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
+                      />
                     ))}
                     <span className="text-sm text-muted-foreground ml-1">& Up</span>
                   </div>
@@ -313,40 +278,30 @@ const Shop = () => {
       </Accordion>
 
       {/* Status Filters */}
-      <Accordion type="single" collapsible defaultValue="status">
-        <AccordionItem value="status" className="border-none">
-          <AccordionTrigger className="text-base font-semibold py-2 hover:no-underline">
-            Product Status
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3 pt-2">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <Checkbox checked={showOnSale} onCheckedChange={() => setShowOnSale(!showOnSale)} />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  On Sale
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <Checkbox checked={showNew} onCheckedChange={() => setShowNew(!showNew)} />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  New Arrivals
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <Checkbox
-                  checked={showBestSeller}
-                  onCheckedChange={() => setShowBestSeller(!showBestSeller)}
-                />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                  Best Sellers
-                </span>
-              </label>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <div className="space-y-3 pt-4 border-t border-border">
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <Checkbox checked={showOnSale} onCheckedChange={(checked) => setShowOnSale(!!checked)} />
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            On Sale
+          </span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <Checkbox checked={showNew} onCheckedChange={(checked) => setShowNew(!!checked)} />
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            New Arrivals
+          </span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <Checkbox
+            checked={showBestSeller}
+            onCheckedChange={(checked) => setShowBestSeller(!!checked)}
+          />
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+            Best Sellers
+          </span>
+        </label>
+      </div>
 
-      {/* Clear Filters */}
       {activeFiltersCount > 0 && (
         <Button variant="outline" className="w-full" onClick={clearFilters}>
           Clear All Filters
@@ -357,7 +312,7 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
+      <Header />
 
       {/* Page Header */}
       <div className="bg-gradient-to-br from-primary to-primary/80 py-12 lg:py-16">
@@ -399,7 +354,9 @@ const Shop = () => {
                       <SlidersHorizontal className="h-4 w-4" />
                       Filters
                       {activeFiltersCount > 0 && (
-                        <Badge className="ml-1">{activeFiltersCount}</Badge>
+                        <Badge variant="secondary" className="ml-1">
+                          {activeFiltersCount}
+                        </Badge>
                       )}
                     </Button>
                   </SheetTrigger>
@@ -413,15 +370,18 @@ const Shop = () => {
                   </SheetContent>
                 </Sheet>
 
+                {/* Results Count */}
                 <p className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium text-foreground">{filteredProducts.length}</span>{' '}
-                  products
+                  {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {/* Sort */}
-                <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                <Select
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as SortOption)}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -430,23 +390,23 @@ const Shop = () => {
                     <SelectItem value="price-low">Price: Low to High</SelectItem>
                     <SelectItem value="price-high">Price: High to Low</SelectItem>
                     <SelectItem value="rating">Highest Rated</SelectItem>
-                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
                   </SelectContent>
                 </Select>
 
-                {/* View Mode */}
+                {/* View Toggle */}
                 <div className="hidden sm:flex items-center border border-border rounded-lg">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary/50'} rounded-l-lg transition-colors`}
+                    className={`p-2 ${viewMode === 'grid' ? 'bg-secondary' : 'hover:bg-secondary/50'} transition-colors`}
                   >
-                    <Grid3X3 className="h-4 w-4" />
+                    <Grid3X3 className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary/50'} rounded-r-lg transition-colors`}
+                    className={`p-2 ${viewMode === 'list' ? 'bg-secondary' : 'hover:bg-secondary/50'} transition-colors`}
                   >
-                    <LayoutList className="h-4 w-4" />
+                    <LayoutList className="h-5 w-5" />
                   </button>
                 </div>
               </div>
@@ -459,7 +419,7 @@ const Shop = () => {
                   <Badge
                     key={cat}
                     variant="secondary"
-                    className="gap-1 pr-1 cursor-pointer hover:bg-secondary"
+                    className="gap-1 cursor-pointer hover:bg-destructive/10"
                     onClick={() => toggleCategory(cat)}
                   >
                     {cat}
@@ -470,7 +430,7 @@ const Shop = () => {
                   <Badge
                     key={sub}
                     variant="secondary"
-                    className="gap-1 pr-1 cursor-pointer hover:bg-secondary"
+                    className="gap-1 cursor-pointer hover:bg-destructive/10"
                     onClick={() => toggleSubcategory(sub)}
                   >
                     {sub}
@@ -480,7 +440,7 @@ const Shop = () => {
                 {showOnSale && (
                   <Badge
                     variant="secondary"
-                    className="gap-1 pr-1 cursor-pointer hover:bg-secondary"
+                    className="gap-1 cursor-pointer hover:bg-destructive/10"
                     onClick={() => setShowOnSale(false)}
                   >
                     On Sale
@@ -490,7 +450,7 @@ const Shop = () => {
                 {showNew && (
                   <Badge
                     variant="secondary"
-                    className="gap-1 pr-1 cursor-pointer hover:bg-secondary"
+                    className="gap-1 cursor-pointer hover:bg-destructive/10"
                     onClick={() => setShowNew(false)}
                   >
                     New Arrivals
@@ -500,27 +460,24 @@ const Shop = () => {
                 {showBestSeller && (
                   <Badge
                     variant="secondary"
-                    className="gap-1 pr-1 cursor-pointer hover:bg-secondary"
+                    className="gap-1 cursor-pointer hover:bg-destructive/10"
                     onClick={() => setShowBestSeller(false)}
                   >
                     Best Sellers
                     <X className="h-3 w-3" />
                   </Badge>
                 )}
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="h-6 text-xs">
-                  Clear All
-                </Button>
               </div>
             )}
 
             {/* Products */}
             {filteredProducts.length > 0 ? (
               <div
-                className={`grid gap-4 lg:gap-6 ${
+                className={
                   viewMode === 'grid'
-                    ? 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
-                    : 'grid-cols-1'
-                }`}
+                    ? 'grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6'
+                    : 'flex flex-col gap-4'
+                }
               >
                 {filteredProducts.map((product) => (
                   <ProductCard
@@ -548,14 +505,6 @@ const Shop = () => {
       </div>
 
       <Footer />
-
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
-      />
     </div>
   );
 };

@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { Search, ShoppingCart, Menu, X, ChevronDown, Phone, MapPin } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, Menu, X, ChevronDown, Phone, MapPin, User } from 'lucide-react';
 import { categories } from '@/data/products';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import CartDrawer from './CartDrawer';
 
-interface HeaderProps {
-  cartCount: number;
-  onCartClick: () => void;
-}
-
-const Header = ({ cartCount, onCartClick }: HeaderProps) => {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { totalItems } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Top Bar */}
@@ -39,12 +41,12 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
         <div className="container mx-auto container-padding py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
-            <a href="/" className="flex-shrink-0">
+            <Link to="/" className="flex-shrink-0">
               <h1 className="font-display font-bold text-xl sm:text-2xl text-primary">
                 SIMBALAND
                 <span className="text-accent">.</span>
               </h1>
-            </a>
+            </Link>
 
             {/* Search Bar - Desktop */}
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
@@ -63,16 +65,24 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* User Account */}
+              <Link
+                to={user ? "/profile" : "/auth"}
+                className="p-2 sm:p-3 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
+              >
+                <User className="w-5 h-5 sm:w-6 sm:h-6 text-foreground" />
+              </Link>
+
               {/* Cart */}
               <button
-                onClick={onCartClick}
+                onClick={() => setIsCartOpen(true)}
                 className="relative p-2 sm:p-3 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors"
               >
                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-foreground" />
-                {cartCount > 0 && (
+                {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                    {cartCount}
+                    {totalItems > 99 ? '99+' : totalItems}
                   </span>
                 )}
               </button>
@@ -109,12 +119,12 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
           <div className="container mx-auto container-padding">
             <ul className="flex items-center gap-1">
               <li>
-                <a
-                  href="/"
+                <Link
+                  to="/"
                   className="block px-4 py-3 font-medium text-foreground hover:text-accent transition-colors"
                 >
                   Home
-                </a>
+                </Link>
               </li>
               {categories.map((category) => (
                 <li
@@ -123,8 +133,8 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                   onMouseEnter={() => setActiveCategory(category.id)}
                   onMouseLeave={() => setActiveCategory(null)}
                 >
-                  <a
-                    href={`/shop?category=${encodeURIComponent(category.name)}`}
+                  <Link
+                    to={`/shop?category=${encodeURIComponent(category.name)}`}
                     className={cn(
                       "flex items-center gap-1 px-4 py-3 font-medium transition-colors",
                       activeCategory === category.id ? "text-accent" : "text-foreground hover:text-accent"
@@ -135,7 +145,7 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                       "w-4 h-4 transition-transform",
                       activeCategory === category.id && "rotate-180"
                     )} />
-                  </a>
+                  </Link>
                   
                   {/* Mega Menu */}
                   <div className="mega-menu">
@@ -147,36 +157,44 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                           </h3>
                           <div className="grid grid-cols-3 gap-4">
                             {category.subcategories.map((sub, idx) => (
-                              <a
+                              <Link
                                 key={idx}
-                                href={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
+                                to={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
                                 className="block p-3 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
                               >
                                 {sub}
-                              </a>
+                              </Link>
                             ))}
                           </div>
                         </div>
-                        <a 
-                          href={`/shop?category=${encodeURIComponent(category.name)}`}
+                        <Link 
+                          to={`/shop?category=${encodeURIComponent(category.name)}`}
                           className="bg-secondary rounded-xl p-4 hover:bg-secondary/80 transition-colors"
                         >
                           <p className="text-sm text-muted-foreground mb-2">Featured</p>
                           <p className="font-semibold text-foreground">Shop {category.name}</p>
                           <p className="text-sm text-accent mt-2">View all products →</p>
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>
                 </li>
               ))}
               <li>
-                <a
-                  href="/contact"
+                <Link
+                  to="/shop"
+                  className="block px-4 py-3 font-medium text-foreground hover:text-accent transition-colors"
+                >
+                  Shop
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/contact"
                   className="block px-4 py-3 font-medium text-foreground hover:text-accent transition-colors"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -193,13 +211,13 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
         <nav className="container mx-auto container-padding py-6">
           <ul className="space-y-2">
             <li>
-              <a
-                href="/"
+              <Link
+                to="/"
                 className="block px-4 py-3 font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
-              </a>
+              </Link>
             </li>
             {categories.map((category) => (
               <li key={category.id}>
@@ -211,13 +229,13 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
                   <ul className="ml-4 mt-2 space-y-1">
                     {category.subcategories.map((sub, idx) => (
                       <li key={idx}>
-                        <a
-                          href={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
+                        <Link
+                          to={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub)}`}
                           className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
                           {sub}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -225,17 +243,29 @@ const Header = ({ cartCount, onCartClick }: HeaderProps) => {
               </li>
             ))}
             <li>
-              <a
-                href="/contact"
+              <Link
+                to="/shop"
+                className="block px-4 py-3 font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Shop All
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/contact"
                 className="block px-4 py-3 font-medium text-foreground hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>
       </div>
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 };

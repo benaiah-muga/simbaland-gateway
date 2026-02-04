@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,11 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 const Contact = () => {
-  const [cartCount] = useState(0);
-
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <Header cartCount={cartCount} onCartClick={() => {}} />
+      <Header />
 
       {/* Page Header */}
       <div className="bg-gradient-to-br from-primary to-primary/80 py-12 lg:py-16">
