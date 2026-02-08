@@ -4,7 +4,8 @@ import { Filter, Grid3X3, LayoutList, X, SlidersHorizontal, Star } from 'lucide-
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { products, categories, Product, formatPrice } from '@/data/products';
+import { categories, Product, formatPrice } from '@/data/products';
+import { useAllProducts } from '@/hooks/useAllProducts';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,8 @@ const Shop = () => {
 
   const { addToCart } = useCart();
   const { toast } = useToast();
-  const maxPrice = Math.max(...products.map((p) => p.price));
+  const { products } = useAllProducts();
+  const maxPrice = Math.max(...products.map((p) => p.price), 6000000);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {

@@ -4,7 +4,8 @@ import { Star, Minus, Plus, ShoppingCart, Heart, Share2, Truck, Shield, RefreshC
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { products, Product, formatPrice } from '@/data/products';
+import { Product, formatPrice } from '@/data/products';
+import { useAllProducts } from '@/hooks/useAllProducts';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +18,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { toast } = useToast();
+  const { products } = useAllProducts();
 
   const product = products.find((p) => p.id === id);
 

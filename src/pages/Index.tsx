@@ -5,11 +5,12 @@ import ProductSection from '@/components/ProductSection';
 import FeaturesBar from '@/components/FeaturesBar';
 import PromoSection from '@/components/PromoSection';
 import Footer from '@/components/Footer';
-import { products } from '@/data/products';
+import { useAllProducts } from '@/hooks/useAllProducts';
 import { useCart } from '@/contexts/CartContext';
 
 const Index = () => {
   const { addToCart } = useCart();
+  const { products } = useAllProducts();
 
   const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 8);
   const recentlyAdded = products.filter((p) => p.isNew).slice(0, 8);
