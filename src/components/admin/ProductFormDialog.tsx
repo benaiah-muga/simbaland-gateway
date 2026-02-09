@@ -90,7 +90,7 @@ export const ProductFormDialog = ({ open, onOpenChange, product }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
             {isEdit ? 'Edit Product' : 'Add New Product'}
@@ -105,7 +105,7 @@ export const ProductFormDialog = ({ open, onOpenChange, product }: Props) => {
           />
 
           {/* Name & SKU */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Product Name *</Label>
               <Input
@@ -125,7 +125,7 @@ export const ProductFormDialog = ({ open, onOpenChange, product }: Props) => {
           </div>
 
           {/* Category & Subcategory */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Category *</Label>
               <Select value={form.category} onValueChange={(v) => {
@@ -154,7 +154,7 @@ export const ProductFormDialog = ({ open, onOpenChange, product }: Props) => {
           </div>
 
           {/* Price & Original Price & Stock */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Price (UShs) *</Label>
               <Input
